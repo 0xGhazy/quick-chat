@@ -1,0 +1,5 @@
+
+# skipping any compiled file
+*.class
+*\target
+
