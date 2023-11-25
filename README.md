@@ -9,8 +9,7 @@
 </div>
 
 ## Overview
-Mini-Discord is a multi-threaded console java application that handles multiple clients requests and converstaion at the same time. it consists of main two parts `Client Application` and `Server Application`. in the following section I'll describe how they work internally and shows the features eith screenshots.
-
+Mini-Discord is a multi-threaded console Java application that handles multiple client requests and conversations at the same time. it consists of main two parts `Client Application` and `Server Application`. In the following section, I'll describe how they work internally and show the features with screenshots.
 
 ## About the server
 
@@ -18,12 +17,12 @@ Mini-Discord is a multi-threaded console java application that handles multiple 
 
 ![server](https://github.com/0xGhazy/0xGhazy/assets/60070427/c29903d3-af3a-4f0e-b7ec-ca1e6392d39e)
 
-Server is the main part of the mini discord application. it starts to listen on the specified port and connect with clients to handle communication and requests.
+The server is the main part of the Mini Discord application. it starts to listen on the specified port and connect with clients to handle communication and requests.
 
-the most important role of teh server is handling multiple requests simultaneously, each client have it's own `Client Handler` which is responsible for sending and receiving messages, and commands from and to the client.
+the most important role of the server is handling multiple requests simultaneously, each client has its own `Client Handler` which is responsible for sending and receiving messages, and commands from and to the client.
 
 **What happens under the hood?**
-- A new client open the client from its end, this will inform the server that a new lobby client is active now.
+- A new client opens the client from its end, this will inform the server that a new lobby client is active now.
 - The server will accept the new client request, then create a new `client handler` and start a new thread for this handler and start it.
 ```java
     // ---- code snippet ---- 
@@ -38,7 +37,7 @@ the most important role of teh server is handling multiple requests simultaneous
     // ---- code snippet ---- 
 ```
 
-- By Client handler constructor take the `socket`, and `username` as an arguments to initialize the client handler object by setting the username for this, and the most important role here is to add `this` -newly created- to the `clientsList` which hold all current active handlers.
+- By Client handler constructor take the `socket`, and `username` as arguments to initialize the client handler object by setting the username for this, and the most important role here is to add `this` -newly created- to the `clientsList` which hold all current active handlers.
 
 ```java
 class ClientHandler implements Runnable {
@@ -65,12 +64,11 @@ class ClientHandler implements Runnable {
 }
 ```
 
+- By starting the client thread, it will trigger the Overrided `run` method from the `Runnable` interface. which will handle the incoming client requests by the specified flag in the request message.
 
-- By starting the client thread, it will trigger the Overrided `run` method from teh `Runnable` interface. which will handle the incomming client requests by the specified flag in the request message.
+- Each client request to be handled by the handler must consist of FLAG, DELIMITER, and PAYLAOD. handler will parse it choose which function will be executed and replay it to the client.
 
-- Each client request to be handled by the handler must consist of FLAG, DELIMITER, ad Payload. handler will parse it and choose which function will be executed and replay tp the client.
-
-Parsing incomming command from the client:
+Parsing incoming commands from the client:
 
 ```java
     // reading commands from the client side.
@@ -98,7 +96,8 @@ Choose which function will be executed:
 ```
 
 ### Internal flags
-The clients send the user message that apply the following structure
+The clients send the user message that applies the following structure
+
 ```
 FLAG DELIMITER PAYLOAD
 ```
@@ -111,11 +110,11 @@ FLAG DELIMITER PAYLOAD
    |  (DELIMITER)
  (FLAG)
 ```
-Here a list of all available and handled flags in server side with its description.
+Here is a list of all available and handled flags on the server side with their descriptions.
 | Flag | Server usage | Followed By | 
 | :--: | :-- | :-- |
 | `[SIGNUP]` | Signup a new user | Serialized `User` object |
-| `[LOAD]` | Read user from database then return it to the client | Username |
+| `[LOAD]` | Read the user from the database then return it to the client | Username |
 | `[RESET]` | Reset user password | Serialized `Credentials` object |
 | `[VALIDATE]` | Validate if the username is exist in database | Username |
 | `[UPDATE]` | Update the user words and conversations | Serialized `User` object |
@@ -130,9 +129,9 @@ Here a list of all available and handled flags in server side with its descripti
 
 | Files in | Description |
 |:--:|:--|
-|database | The database API which responsible for dealing with database and tasks sush as *`adding new user`*, *`update user statistics`*  etc.|
-| model | the main object classes which the server and the client exchanges togather |
-| server | contains the server backend logic such as *`running the server`*, and *`handling incomming requests`* |
+|database | The database API responsible for dealing with the database and tasks such as *` adding new user`*, *` update user statistics`*, etc.|
+| model | the main object classes that the server and the client exchange together |
+| server | contains the server backend logic such as *`running the server`*, and *`handling incoming requests`* |
 | service | all needed functionality by the `models` such as *`serialization`*, *`deserialization`*, and *`hashing`* function|
 | utils | all utility functions such as logging, colored output, banners, etc.|
 | Settings.java | all settings needed by the server is here such as *`port`*, *`host`*, *`database connection`*, etc.|
@@ -140,9 +139,10 @@ Here a list of all available and handled flags in server side with its descripti
 ### Features & Screenshots
 
 - **Secured stored credentials**
-All confidenial data is stored hashed in the database using the `SHA256` algorithm. from `guava` library
+All confidential data is stored hashed in the database using the `SHA256` algorithm. from `guava` library
 
 ![hashed passwords](https://github.com/0xGhazy/0xGhazy/assets/60070427/318141ed-1b2d-4749-8b19-e42df3658bc7)
+
 ```xml
     <dependency>
         <groupId>com.google.guava</groupId>
@@ -189,7 +189,7 @@ public class Settings {
 
 The client is the second important part of the application, by running the `client` it will try to connect to the server on the specified host and port number in the `Settings.java`. seeing the `prompt` means you can ask the server for the actions you need in your current mode. 
 
-The client have 3 main modes:
+The client has 3 main modes:
 | Mode | Description | How to active? |
 | :--: | :--         | :--:          |
 | Lobby | The default mode when opening the client | default |
@@ -203,10 +203,10 @@ Use `/help` to get the current available commands for `Lobby`, and `Active` mode
 
 | Files in | Description |
 |:--:|:--|
-| model | The main object classes which the server and the client exchanges togather |
+| model | The main object classes that the server and the client exchange together |
 | network | Connection handlers such as *`client connection handler`*, and *`message listener`* |
 | service | All needed functionality by the `models` such as *`serialization`*, *`deserialization`*, *`hashing`*, *`reporting`* functions |
-| ui | All ui modes andd functions such as colored output, banners, and *`login`*, *`signup`*, and *`reset password`* etc.|
+| ui | All ui modes and functions such as colored output, banners, and *`login`*, *`signup`*, and *` reset password`*, etc.|
 | utils | All utility functions such as date and time, and used validations.|
 | Settings.java | All settings needed by the client is here such as *`port`*, *`host`*, and *`delimiter`*, etc.|
 
@@ -214,7 +214,7 @@ Use `/help` to get the current available commands for `Lobby`, and `Active` mode
 ### Features & Screenshots
 
 - **Signup**
-Passwords are taken from user via `console.readPassword()` which allows you to take passwords hidden, with no echo in console. Username validation also happens during filling account data.
+Passwords are taken from the user via `console.readPassword()` which allows you to take passwords hidden, with no echo in the console. Username validation also happens during the filling of account data.
 ![signup-gif](https://github.com/0xGhazy/0xGhazy/assets/60070427/d2e90d26-5e93-4fac-8cff-415258b1534d)
 
 - **Signin**
@@ -226,19 +226,18 @@ Passwords are taken from user via `console.readPassword()` which allows you to t
 ![reset-gif](https://github.com/0xGhazy/0xGhazy/assets/60070427/c316bdc6-7d71-4a63-934e-9b004eaf3942)
 
 - **Join Chat**
-Users try to join the room using `/join` command in the active mode. if user face any problem he will try to use the command again untill joining the room. All messages will be broadcast to the peers in the room.
+Users try to join the room using `/join` command in the active mode. if the user faces any problem he will try to use the command again until joining the room. All messages will be broadcast to the peers in the room.
 
-if usr user `/leave` or `bye bye` command he will leaft the room, Then ask the server for a snapshot of the conversation till the moment he leaves in.
-
+if the user uses `/leave` or `bye bye` command he will leave the room and then ask the server for a snapshot of the conversation till the moment he leaves.
 
 ![chat-gif](https://github.com/0xGhazy/0xGhazy/assets/60070427/6a31d491-01da-4839-b3b9-0acb58cf939c)
 
-There are 4 file dumps happend here
+There are 4 file dumps that happened here
 
-- `/{username}/conversation-temp.txt` contains this conversation messages.
-- `/{username}/conversation-total.txt` contains all time conversation words
-- `/{username}/words-temp.txt` contains this conversation words and its frequency. 
-- `/{username}/words-total.txt` contains all time words and its frequency.
+- `/{username}/conversation-temp.txt` contains this conversation message.
+- `/{username}/conversation-total.txt` contains all-time conversation words
+- `/{username}/words-temp.txt` contains these conversation words and their frequency. 
+- `/{username}/words-total.txt` contains all-time words and their frequency.
 
 ![user-dump-gif](https://github.com/0xGhazy/0xGhazy/assets/60070427/1b259ab8-2af2-43fb-ab94-7c7e594d6f7b)
 
@@ -252,7 +251,42 @@ There are 4 file dumps happend here
 
 
 ## Installation guidelines
-IN progress
+
+1. First clone this repository
+```shell
+git clone https://github.com/0xGhazy/mini-discord.git
+```
+
+2- Create a new database with the following command
+
+```sql
+CREATE DATABASE `mini_discord`
+```
+
+3- Create User table inside the database
+```sql
+CREATE TABLE `users` (
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `secQ` varchar(255) NOT NULL,
+  `secA` varchar(255) NOT NULL,
+  `words` blob,
+  `conversations` blob,
+  PRIMARY KEY (`username`)
+)
+```
+
+4- Open the server project directory with your favorite IDE and run the server first. Make sure that the server is running like the following image:
+
+In my case, IntelliJ IDE has downloaded all dependencies, so make sure your pom.xml file dependencies are downloaded successfully in the client and server code.
+
+![server run ](https://github.com/0xGhazy/0xGhazy/assets/60070427/6feb44c1-315f-43dd-abcf-bed589e86877)
+
+5- Open the client project directory with your favorite IDE and run the client. **Using Visual Code is preferred because of its integrated terminal that allows us to use the console module for better password taking**
+
+![client](https://github.com/0xGhazy/0xGhazy/assets/60070427/8a7695d4-d97c-4311-9fa0-e3e8ff993d6b)
+
+Happy chatting and dumping 🎉😊
 
 ---
 #### Old related projects

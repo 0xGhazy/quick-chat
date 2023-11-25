@@ -41,7 +41,7 @@ public class Main {
         CredentialsService credentialsService = new CredentialsService();
 
         // display application banner
-        // Banner.printMainBanner();
+        Banner.printMainBanner();
 
         print(SYSTEM, "Try to connect to the server @ " + Settings.HOST + ":" + Settings.PORT);
 
