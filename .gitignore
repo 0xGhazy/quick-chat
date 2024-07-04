@@ -1,7 +1,5 @@
 
 # skipping any compiled file
 *.class
-*\target
-
-Assessment Submission Summary.pdf
-Chat App.pdf
+*\target\*
+.idea/
