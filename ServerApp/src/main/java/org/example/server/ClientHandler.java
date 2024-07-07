@@ -1,5 +1,7 @@
 package org.example.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.Settings;
 import org.example.database.SingletonDatabaseAPI;
 import org.example.model.Conversation;
@@ -10,9 +12,7 @@ import org.example.service.CredentialsService;
 import org.example.service.HashingService;
 import org.example.service.UserService;
 import org.example.utils.COLOR;
-import org.example.utils.ColoredTerminal;
 import org.example.utils.DateTimeHandler;
-import org.example.utils.Logger;
 
 import java.io.*;
 import java.net.Socket;
@@ -25,10 +25,8 @@ import java.util.ArrayList;
 class ClientHandler implements Runnable {
 
     private Socket socket;
-    private String command;
     private String username;
     private final ColoredTerminal terminal = new ColoredTerminal();
-    private final Logger logger = new Logger();
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private final UserService userService = new UserService();
@@ -37,7 +35,7 @@ class ClientHandler implements Runnable {
     private static Conversation conversation = new Conversation();
     private static ArrayList<ClientHandler> clientsList = new ArrayList<>();
     private final SingletonDatabaseAPI databaseAPI = SingletonDatabaseAPI.getInstance();
-
+    private static final Logger logger = LogManager.getLogger(ClientHandler.class);
 
     public ClientHandler(Socket socket, String username) {
         try {
@@ -46,8 +44,8 @@ class ClientHandler implements Runnable {
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = username;
             clientsList.add(this);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioException) {
+            logger.error("msg: I/O exception happened, exception:{}", ioException.toString());
         }
     }
 
@@ -56,13 +54,14 @@ class ClientHandler implements Runnable {
         try {
             while (socket.isConnected()) {
                 // reading commands from the client side.
-                command = bufferedReader.readLine();
+                String command = bufferedReader.readLine();
                 String[] commandArray = command.split(Settings.DELIMITER);
                 String flag = commandArray[0];
                 String payload = commandArray[1];
 
+                logger.debug("flag: {}, payload: {}, msg: request captured", flag, payload);
+
                 if (flag.equals("[SIGNUP]")) {
-                    logger.logThis("request", "Signup request is captured");
                     User user = userService.deSerialize(payload);
                     user.setPassword(HashingService.getSha256(user.getPassword()));
                     user.setSecA(HashingService.getSha256(user.getSecA()));
@@ -70,92 +69,83 @@ class ClientHandler implements Runnable {
                     String result = databaseAPI.insertUser(user);
                     sendMessage(this, result);
                 }
-
                 else if(flag.equals("[LOAD]")) {
-                    logger.logThis("request", "Load user for password reset request is captured");
                     User user = databaseAPI.loadUserByUsername(payload);
                     if (user.getUsername() != null) {
                         String userJson = userService.serialize(user);
                         sendMessage(this, "[VALID]" + Settings.DELIMITER + userJson);
-                        logger.logThis("replay", "Replay with valid username with the user object");
+//                        logger.logThis("replay", "Replay with valid username with the user object");
                     } else {
                         sendMessage(this, "[INVALID] Invalid username");
-                        logger.logThis("replay", "Replay with invalid username");
+//                        logger.logThis("replay", "Replay with invalid username");
                     }
                 }
 
                 else if(flag.equals("[RESET]")) {
-                    logger.logThis("request", "Reset password request is captured");
                     Credentials credentials = credentialsService.deSerialize(payload);
                     String username = credentials.getUsername();
                     String password = credentials.getPassword();
                     // hashing the new password
                     password = HashingService.getSha256(password);
                     String result = databaseAPI.updatePassword(username, password);
-                    logger.logThis("info", "Account updated [" + result + "]");
                     sendMessage(this, result);
                 }
 
                 else if(flag.equals("[VALIDATE]")) {
-                    logger.logThis("request", "Username availability request is captured");
                     if(databaseAPI.validateUsername(payload))
                     {
                         sendMessage(this, "[VALID] username is valid.");
-                        logger.logThis("replay", "Replay with {" + payload +"} is valid username");
+//                        logger.logThis("replay", "Replay with {" + payload +"} is valid username");
                     }
                     else{
                         sendMessage(this, "[INVALID] username is invalid.");
-                        logger.logThis("replay", "Replay with {" + payload +"} is invalid username");
+//                        logger.logThis("replay", "Replay with {" + payload +"} is invalid username");
                     }
                 }
 
                 else if(flag.equals("[UPDATE]")) {
-                    logger.logThis("request", "Update database record request is captured");
                     User user = userService.deSerialize(payload);
                     String result = databaseAPI.updateUserConversationAndWords(user);
                     System.out.println(result);
                 }
 
                 else if(flag.equals("[SNAPSHOT]")) {
-                    logger.logThis("request", "Conversation snapshot request is captured");
                     Conversation conversationCopy = new Conversation();
                     conversationCopy.setMessages(conversation.getMessages());
                     conversationCopy.setUsername(payload);
                     conversationCopy.setStartTime(conversation.getStartTime());
                     conversationCopy.setEndTime(DateTimeHandler.timeNow());
                     String conversationJson = conversationService.serialize(conversationCopy);
-                    logger.logThis("info", "Conversation messages serialized successfully");
+//                    logger.logThis("info", "Conversation messages serialized successfully");
                     sendMessage(this, conversationJson);
                     sendMessage(this, conversationJson);
-                    logger.logThis("replay", "Replay with the snapshot");
+//                    logger.logThis("replay", "Replay with the snapshot");
                 }
 
                 else if(flag.equals("[AUTH]")) {
-                    logger.logThis("request", "Login request is captured");
                     // hash password then pass to database
                     Credentials credentials = credentialsService.deSerialize(payload);
                     String username = credentials.getUsername();
                     String password = HashingService.getSha256(credentials.getPassword());
                     User resultUser = databaseAPI.authenticateUser(username, password);
-                    logger.logThis("request", "Credentials authentication request is captured");
+//                    logger.logThis("request", "Credentials authentication request is captured");
                     if(resultUser.getUsername() != null && resultUser.getPassword() != null)
                     {
                         this.username = resultUser.getUsername();
                         sendMessage(this, "[AUTHORIZED]>" + userService.serialize(resultUser));
-                        logger.logThis("replay", "Replay with AUTHORIZED");
+//                        logger.logThis("replay", "Replay with AUTHORIZED");
                     } else {
                         sendMessage(this, "[NOT_AUTHORIZED]>Invalid credentials passed.");
-                        logger.logThis("replay", "Replay with UNAUTHORIZED");
+//                        logger.logThis("replay", "Replay with UNAUTHORIZED");
                     }
                 }
 
                 else if(flag.equals("[JOIN]")) {
-                    logger.logThis("request", "Join chat room request is captured");
                     sendMessage(this, "[ACCEPTED]");
-                    logger.logThis("replay", "Replay with ACCEPTED");
+//                    logger.logThis("replay", "Replay with ACCEPTED");
                     this.username = payload;
                     broadcastMessage(String.format("[MINI DISCORD SERVER] %s has joined the chat", this.username));
-                    logger.logThis("broadcast", "inform all members if the newly joined member");
+//                    logger.logThis("broadcast", "inform all members if the newly joined member");
                 }
 
                 else if(flag.equals("[BROADCAST]")) {
@@ -164,15 +154,15 @@ class ClientHandler implements Runnable {
                     String sender = message[0];
                     String finalMessage = String.format("[%s] %s: %s", DateTimeHandler.timeNow(), sender, messageBody);
                     broadcastMessage(finalMessage);
-                    logger.logThis("broadcast", "Message sent by user {" + sender + "} to all members");
+//                    logger.logThis("broadcast", "Message sent by user {" + sender + "} to all members");
                     conversation.pushMessage(finalMessage);
                 }
 
                 else if(flag.equals("[LEAVE]")) {
-                    logger.logThis("request", "Leaving chat room request is captured");
+//                    logger.logThis("request", "Leaving chat room request is captured");
                     broadcastMessage(String.format("["+  terminal.colored("SERVER", COLOR.RED_BG) +"] %s Has left the chat!", username));
-                    logger.logThis("broadcast", "Inform all members that " + username + " has left the chat room");
-                    logger.logThis("info", username + " has left the chat room");
+//                    logger.logThis("broadcast", "Inform all members that " + username + " has left the chat room");
+//                    logger.logThis("info", username + " has left the chat room");
                     leaveChat();
                 }
 
@@ -180,11 +170,11 @@ class ClientHandler implements Runnable {
         }
         catch (SocketException socketException)
         {
-            logger.logThis("error", "Lost connection with " + username);
-            logger.logThis("error", "Error message: " + socketException.getMessage());
+//            logger.logThis("error", "Lost connection with " + username);
+//            logger.logThis("error", "Error message: " + socketException.getMessage());
         }
         catch (IOException | SQLException | NoSuchAlgorithmException e) {
-            logger.logThis("error", "Error message: " + e.getMessage());
+//            logger.logThis("error", "Error message: " + e.getMessage());
         }
     }
 
@@ -205,7 +195,7 @@ class ClientHandler implements Runnable {
             }
             catch (IOException e)
             {
-                logger.logThis("error", "Error message: " + e.getMessage());
+//                logger.logThis("error", "Error message: " + e.getMessage());
             }
         }
     }
