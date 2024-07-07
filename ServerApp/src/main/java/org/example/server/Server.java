@@ -1,50 +1,45 @@
 package org.example.server;
 
 import org.apache.logging.log4j.LogManager;
-import org.example.Main;
+import org.apache.logging.log4j.Logger;
 import org.example.utils.DateTimeHandler;
-import org.example.utils.Logger;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-
 public class Server {
 
-    private ServerSocket serverSocket;
-    private Integer port;
-//    private Logger logger = new Logger();
-    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(Main.class);
+    private final Integer port;
+    private final ServerSocket serverSocket;
+    private static final Logger logger = LogManager.getLogger(Server.class);
 
     public Server(ServerSocket serverSocket, Integer port) {
         this.serverSocket = serverSocket;
         this.port = port;
     }
 
-    public void start()
-    {
-
-        logger.debug("Listening for client requests. . .");
+    public void start() {
+        logger.info("Listening for client requests on localhost:{}", port);
         try {
             while(!serverSocket.isClosed())
             {
                 Socket clientSocket = serverSocket.accept();
+
                 // generate a temporary name for lobby clients.
-                String tempUsername = "lobby-client-" + DateTimeHandler.timestampNow();
-//                logger.logThis("info", "Listening for client requests. . .");
-//                logger.logThis("request", "A new lobby client request is accepted");
-                ClientHandler clientHandler = new ClientHandler(clientSocket, tempUsername);
+                String clientName = "lobby-client-" + DateTimeHandler.timestampNow();
+                logger.debug("New connection accepted as {}", clientName);
+
+                ClientHandler clientHandler = new ClientHandler(clientSocket, clientName);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
         } catch (SocketException socketException) {
-            socketException.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("msg: Socket exception happened, exception:{}", socketException.toString());
+        } catch (IOException ioException) {
+            logger.error("msg: I/O exception happened, exception:{}", ioException.toString());
         }
     }
-
 
 }

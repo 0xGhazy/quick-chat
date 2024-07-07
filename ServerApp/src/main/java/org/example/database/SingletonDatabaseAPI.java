@@ -1,9 +1,10 @@
 package org.example.database;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.model.User;
 import org.example.service.UserService;
-import org.example.utils.Logger;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,9 +14,9 @@ import java.util.HashMap;
 public class SingletonDatabaseAPI {
 
     private UserService service = new UserService();
-    private Logger logger = new Logger();
     private static SingletonDatabaseAPI single_instance = null;
     private Connection connection = null;
+    private static final Logger logger = LogManager.getLogger(SingletonDatabaseAPI.class);
 
     public static synchronized SingletonDatabaseAPI getInstance() {
         if (single_instance == null)
@@ -45,15 +46,15 @@ public class SingletonDatabaseAPI {
             preparedStatement.setBytes(6, serializedConversations);
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                logger.logThis("info", String.format("{%s} user account is created", user.getUsername()));
+//                logger.logThis("info", String.format("{%s} user account is created", user.getUsername()));
             } else {
-                logger.logThis("error", String.format("Failed to create user", user));
+//                logger.logThis("error", String.format("Failed to create user", user));
                 return "[ERROR] Create account failed!";
             }
         }
         catch (IOException ex)
         {
-            logger.logThis("error", String.format("Exception in create new account [%s]", ex.getMessage()));
+//            logger.logThis("error", String.format("Exception in create new account [%s]", ex.getMessage()));
         }
         return "Your account has been created successfully!";
     }
@@ -120,15 +121,15 @@ public class SingletonDatabaseAPI {
             preparedStatement.setString(3, user.getUsername());
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                logger.logThis("info", String.format("{%s} user account dumbed in database successfully", user.getUsername()));
+//                logger.logThis("info", String.format("{%s} user account dumbed in database successfully", user.getUsername()));
             } else {
-                logger.logThis("error", String.format("Failed to update user", user));
+//                logger.logThis("error", String.format("Failed to update user", user));
                 return "[ERROR] dump account in database failed!";
             }
         }
         catch (IOException ex)
         {
-            logger.logThis("error", String.format("Exception in create new account [%s]", ex.getMessage()));
+//            logger.logThis("error", String.format("Exception in create new account [%s]", ex.getMessage()));
         }
         return "[SUCCESS] Your account has been created successfully!";
     }
@@ -142,15 +143,15 @@ public class SingletonDatabaseAPI {
             preparedStatement.setString(2, username);
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                logger.logThis("info", "{" + username + "} account password updated successfully");
+//                logger.logThis("info", "{" + username + "} account password updated successfully");
                 return "Password updated successfully for " + username;
             } else {
-                logger.logThis("error", "Failed to update {" + username + "} password");
+//                logger.logThis("error", "Failed to update {" + username + "} password");
                 return "Failed to updated password for " + username;
             }
         }
         catch (SQLException ex) {
-            logger.logThis("error", String.format("Error message: " + ex.getMessage()));
+//            logger.logThis("error", String.format("Error message: " + ex.getMessage()));
         }
         return "";
     }
