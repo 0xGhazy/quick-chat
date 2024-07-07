@@ -1,5 +1,7 @@
 package org.example.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.example.Main;
 import org.example.utils.DateTimeHandler;
 import org.example.utils.Logger;
 
@@ -13,7 +15,8 @@ public class Server {
 
     private ServerSocket serverSocket;
     private Integer port;
-    private Logger logger = new Logger();
+//    private Logger logger = new Logger();
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(Main.class);
 
     public Server(ServerSocket serverSocket, Integer port) {
         this.serverSocket = serverSocket;
@@ -22,15 +25,16 @@ public class Server {
 
     public void start()
     {
-        logger.logThis("info", "Listening for client requests. . .");
+
+        logger.debug("Listening for client requests. . .");
         try {
             while(!serverSocket.isClosed())
             {
                 Socket clientSocket = serverSocket.accept();
                 // generate a temporary name for lobby clients.
                 String tempUsername = "lobby-client-" + DateTimeHandler.timestampNow();
-                logger.logThis("info", "Listening for client requests. . .");
-                logger.logThis("request", "A new lobby client request is accepted");
+//                logger.logThis("info", "Listening for client requests. . .");
+//                logger.logThis("request", "A new lobby client request is accepted");
                 ClientHandler clientHandler = new ClientHandler(clientSocket, tempUsername);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
