@@ -26,7 +26,6 @@ class ClientHandler implements Runnable {
 
     private Socket socket;
     private String username;
-    private final ColoredTerminal terminal = new ColoredTerminal();
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private final UserService userService = new UserService();
@@ -160,7 +159,7 @@ class ClientHandler implements Runnable {
 
                 else if(flag.equals("[LEAVE]")) {
 //                    logger.logThis("request", "Leaving chat room request is captured");
-                    broadcastMessage(String.format("["+  terminal.colored("SERVER", COLOR.RED_BG) +"] %s Has left the chat!", username));
+//                    broadcastMessage(String.format("["+  terminal.colored("SERVER", COLOR.RED_BG) +"] %s Has left the chat!", username));
 //                    logger.logThis("broadcast", "Inform all members that " + username + " has left the chat room");
 //                    logger.logThis("info", username + " has left the chat room");
                     leaveChat();
