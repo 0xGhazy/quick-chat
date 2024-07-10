@@ -8,20 +8,22 @@ import java.util.HashMap;
 @Data
 public class User {
 
+    private Long id;
+    private String email;
+    private String firstName;
+    private String lastName;
     private String username;
-    private String password;
-    private String secQ;
-    private String secA;
     private HashMap<String, Long> words = new HashMap<>();
     private ArrayList<String> conversations = new ArrayList<>();
 
     @Override
     public String toString() {
         return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", secQ='" + secQ + '\'' +
-                ", secA='" + secA + '\'' +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
                 ", words=" + words +
                 ", conversations=" + conversations +
                 '}';
