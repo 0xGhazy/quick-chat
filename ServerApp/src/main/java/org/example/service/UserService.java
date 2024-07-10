@@ -15,14 +15,8 @@ public class UserService {
     private final UserRepository repository = new UserRepository();
 
 
-    public Optional<User> insert(User user) {
-        try {
-            return repository.insertUser(user);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Optional<User> insert(User user) throws SQLException, IOException {
+        return repository.insertUser(user);
     }
 
     public Optional<User> update(Long id, User user) {
@@ -37,16 +31,8 @@ public class UserService {
         }
     }
 
-    public Optional<User> loadUserByUsernameAndPassword(String username, String password) {
-        try {
-            return repository.findByUsernameAndPassword(username, password);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public Optional<User> loadUserByUsernameAndPassword(String username, String password) throws SQLException, IOException, ClassNotFoundException {
+        return repository.findByUsernameAndPassword(username, password);
     }
 
     public Optional<User> findById(Long id) {
@@ -61,7 +47,7 @@ public class UserService {
         }
     }
 
-    public Optional<User> findById(String email) {
+    public Optional<User> findByEmail(String email) {
         try {
             return repository.findByEmail(email);
         } catch (SQLException e) {
@@ -77,8 +63,11 @@ public class UserService {
         return gson.toJson(user);
     }
 
-    public User jsonToObject(String userJson) {
-        return gson.fromJson(userJson, User.class);
+    public Optional<User> jsonToObject(String userJson) {
+        if (userJson == null || userJson.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(gson.fromJson(userJson, User.class));
     }
 
 }
