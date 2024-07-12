@@ -1,6 +1,5 @@
 package org.example.ui;
 
-import org.example.model.Credentials;
 import org.example.model.User;
 import org.example.network.ClientConnectionHandler;
 import org.example.utils.Validator;
@@ -14,6 +13,7 @@ public class Signup {
     private ColoredTerminal terminal = new ColoredTerminal();
     private User user = new User();
     private final String ERROR = terminal.colored(" ERROR ", COLOR.RED_BG);
+    // TODO: enhance this to load available questions from server database.
     private String[] securityQuestions = { "What is Your favorite movie name?",
             "What is your mom middle name?",
             "Place holder question 3",
@@ -21,7 +21,8 @@ public class Signup {
 
     public User takeUserData(String exitCommand, ClientConnectionHandler client)
             throws IOException, InterruptedException {
-        String username, password, secQ = null, secA;
+
+        String firstname, lastname, email, username, password, secQ = null, secA;
         Integer userChoice;
 
         // take and validate username
@@ -84,9 +85,9 @@ public class Signup {
 
         // return valid user object
         user.setUsername(username);
-        user.setPassword(password);
-        user.setSecQ(secQ);
-        user.setSecA(secA);
+//        user.setPassword(password);
+//        user.setSecQ(secQ);
+//        user.setSecA(secA);
         return user;
     }
 
