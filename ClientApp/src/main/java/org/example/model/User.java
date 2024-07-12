@@ -1,29 +1,24 @@
 package org.example.model;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 @Data
+@ToString
 public class User {
 
+    private Long id;
+    private String email;
+    private String firstName;
+    private String lastName;
     private String username;
     private String password;
-    private String secQ;
-    private String secA;
+    private String securityQuestionId;
+    private String securityAnswer;
     private HashMap<String, Long> words = new HashMap<>();
     private ArrayList<String> conversations = new ArrayList<>();
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", secQ='" + secQ + '\'' +
-                ", secA='" + secA + '\'' +
-                ", words=" + words +
-                ", conversations=" + conversations +
-                '}';
-    }
 }

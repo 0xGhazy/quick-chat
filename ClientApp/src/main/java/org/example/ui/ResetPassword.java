@@ -17,7 +17,6 @@ public class ResetPassword {
 
     private Console console = System.console();
     private ColoredTerminal terminal = new ColoredTerminal();
-    private static HashingService hashingService = new HashingService();
     private UserService userService = new UserService();
     private final String ERROR = terminal.colored(" ERROR ", COLOR.RED_BG);
     private final String SYSTEM = terminal.colored(" SYSTEM ", COLOR.BLUE_BG);
@@ -59,9 +58,9 @@ public class ResetPassword {
             }
         }
 
-        if(user.getSecQ() != null)
+        if(user.getSecurityQuestionId() != null)
         {
-            print(SYSTEM, user.getSecQ());
+            print(SYSTEM, user.getSecurityQuestionId());
             tempAnswer = console.readLine("Enter Answer: ");
             while(tempAnswer.equals(""))
             {
@@ -72,7 +71,7 @@ public class ResetPassword {
                 return credentials;
 
             // check for answer correctness
-            if(HashingService.getSha256(tempAnswer).equals(user.getSecA()))
+            if(HashingService.getSha256(tempAnswer).equals(user.getSecurityAnswer()))
             {
                 // get new password here then
                 newPassword = String.valueOf(console.readPassword("Enter new password: "));
